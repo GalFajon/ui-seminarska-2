@@ -24,10 +24,10 @@ class Warehouse:
         if box in row:
           self.boxes[box]["position"] = j
 
-        if len(row) == 0 or box == row[-1]:
-          self.boxes[box]["on_top"] = True
-        else:
-          self.boxes[box]["on_top"] = False
+          if box == row[-1]:
+            self.boxes[box]["on_top"] = True
+          else:
+            self.boxes[box]["on_top"] = False
 
   def to_string(self):
     swapped = [[' '] * self.p for i in range(0,self.n)]

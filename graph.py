@@ -2,10 +2,13 @@ import warehouse;
 import robotarm;
 
 class Graph:
-  def __init__(self,parent,children,state):
+  def __init__(self,parent,children,state, root=None):
     self.parent = parent
     self.children = children
     self.state = state
+
+    if root is not None: self.root = root
+    else: self.root = self
   
   # Checks if two states on the graph are equal.
   @staticmethod
@@ -39,21 +42,11 @@ class Graph:
     if can_add:
         self.children.append(new)
 
-  # Develops all possible states from the current state and adds it to children.
   def develop(self):
-
-    # Conditions of a developed state:
-    # - Only a single box can be moved
-    # - Iterate through candidate boxes, create a state on the tree for every possible movement of the box.
-    # - A boxes possible movements are every space it is not currently on.
-    # - A box can only be moved if it is the last element in its respective array.
-
     for box in self.state.boxes:
-        if self.state.boxes[box]["on_top"] == False:
-            break
+        if self.state.boxes[box]["on_top"] != False:
+            possible_positions = [i for i in range(0,self.state.p) if i != self.state.boxes[box]["position"]]
 
-        possible_positions = [i for i in range(0,self.state.p) if i != self.state.boxes[box]["position"]]
-
-        for pos in possible_positions:
-            s = warehouse.Warehouse(self.state.p,self.state.n,robotarm.move(self.state,self.state.boxes[box]["position"],pos))
-            self.add(Graph(self,[],s))
+            for pos in possible_positions:
+                s = warehouse.Warehouse(self.state.p,self.state.n,robotarm.move(self.state,self.state.boxes[box]["position"],pos))
+                self.add(Graph(self,[],s, self.root))

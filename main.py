@@ -2,10 +2,9 @@ import warehouse;
 import graph;
 import search;
 
-w = warehouse.Warehouse(3,3,[ ["A"],["B"],["C"] ])
-g = graph.Graph(None,[],w)
+g = graph.Graph(warehouse.Warehouse(3,3,( ("A"),("B"),("C") )))
 
 w2 = warehouse.Warehouse(3,3,[ ['B','C','A'], [], [] ])
-g2 = graph.Graph(None,[],w2)
+n2 = graph.Node(set(),set(),w2)
 
-print(search.id(g,g2).state.arr)
+print(search.id(g,n2).state.arr)

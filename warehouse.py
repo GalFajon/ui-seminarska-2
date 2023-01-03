@@ -14,7 +14,7 @@ class Warehouse:
             "on_top": False
           }
     else:
-      self.arr = [[] for i in range(0,p)]
+      self.arr =(() for i in range(0,p))
 
     self.update()
 

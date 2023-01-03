@@ -1,7 +1,7 @@
 def move(w,p,r):
-    arr = [arr.copy() for arr in w.arr]
+    arr = [list(arr) for arr in list(w.arr)]
     arr[r].append(arr[p].pop())
-
+    arr = tuple(tuple(arr) for arr in arr)
     return arr
 
 def add(w,p,box):

@@ -170,4 +170,68 @@ def evaluate(state1,state2):
     
     return round(s)
 
-#def astar(g,end)
+def astar(g,end):
+    max_nodes_in_mem = 0
+    nodes_processed = 0
+
+    v = set()
+    q = [ g.root ]
+    travelled = 0
+
+    heuristics = dict()
+    heuristics[g.root.state.arr] = 0 + evaluate(g.root.state,end.state)
+
+    next = q[0]
+    next.prev = None
+
+    # algo:
+    while not graph.Node.is_equal(next.state.arr,end.state.arr):
+        v.add(next.state.arr)
+        next.develop()
+
+        n = [child for child in next.children if child.state.arr not in v]
+        
+        for child in n:
+            child.prev = next
+            heuristics[child.state.arr] = travelled + evaluate(child.state,end.state)
+
+        q.extend(n)
+        travelled += 1
+
+        if len(q) > max_nodes_in_mem:
+            max_nodes_in_mem = len(q)
+
+        min = math.inf
+        
+        for i,el in enumerate(q):
+            if heuristics[el.state.arr] < min:
+                min = heuristics[el.state.arr]
+                next = el
+                q.pop(i)
+        
+        nodes_processed += 1
+
+    # trace:
+    trace = next
+    seq = []
+
+    while trace.prev is not None:
+        seq.append(trace.state.arr)
+
+        for box in trace.state.boxes:
+            if trace.state.boxes[box]['position'] != trace.prev.state.boxes[box]['position']:
+                seq.append([trace.prev.state.boxes[box]['position'],trace.state.boxes[box]['position']])
+
+        trace = trace.prev
+    
+    seq.append(g.root.state.arr)
+
+    for line in reversed(seq):
+        print(line)
+
+    #stats:
+    print("statistika:")
+    print("st vozlisc v mem: ", max_nodes_in_mem)
+    print("obdelanih vozlisc: ", nodes_processed)
+
+    return next

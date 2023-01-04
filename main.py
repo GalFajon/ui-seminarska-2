@@ -7,4 +7,4 @@ g = graph.Graph(warehouse.Warehouse(3,3,tuple([ tuple([]),tuple(["B"]),tuple(["A
 w2 = warehouse.Warehouse(3,3,[ ['B','C','A'], [], [] ])
 n2 = graph.Node(set(),set(),w2)
 
-search.dfs(g,n2)
+search.astar(g,n2)

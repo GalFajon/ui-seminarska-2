@@ -11,6 +11,7 @@ class Warehouse:
         for j in arr[i]:
           self.boxes[j] = {
             "position": i,
+            "height": j,
             "on_top": False
           }
     else:
@@ -21,13 +22,15 @@ class Warehouse:
   def update(self):
     for box in self.boxes:
       for j,row in enumerate(self.arr):
-        if box in row:
-          self.boxes[box]["position"] = j
+        for i,char in enumerate(row):
+          if box == char:            
+            self.boxes[box]["position"] = j
+            self.boxes[box]["height"] = i
 
-          if box == row[-1]:
-            self.boxes[box]["on_top"] = True
-          else:
-            self.boxes[box]["on_top"] = False
+            if box == row[-1]:
+              self.boxes[box]["on_top"] = True
+            else:
+              self.boxes[box]["on_top"] = False
 
   def to_string(self):
     swapped = [[' '] * self.p for i in range(0,self.n)]

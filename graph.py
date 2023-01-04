@@ -4,10 +4,56 @@ import robotarm;
 class Graph:
   def __init__(self,initial):
     self.cache = dict()
+    self.distances = dict()
     self.root = Node(set(),set(),initial,self)
   
   def cache_node(self,node):
     self.cache[node.state.arr] = node
+
+  def develop_entire_graph(self):
+    n = [ self.root ]
+    v = { self.root.state.arr }
+
+    while len(n) > 0: 
+      n[0].develop()
+      n.extend([child for child in n[0].children if child.state.arr not in v])
+      v.add(n[0].state.arr)
+      n.pop(0)
+
+  @staticmethod
+  def get_distance(start,end):
+      q = [ start ]
+      l = []
+      n = 0
+      v = set()
+
+      while not Node.is_equal(q[0].state.arr,end.state.arr):
+          v.add(q[0].state.arr)
+          l.append(q.pop(0))
+          
+          if len(q) == 0:
+              n += 1
+              while len(l) > 0:
+                  l[0].develop()
+                  q.extend([ child for child in l[0].children if child.state.arr not in v ])
+                  l.pop(0)   
+
+      return n
+
+  def calculate_distances(self):
+    self.develop_entire_graph()
+    nodes = list(self.cache.values())
+
+    while len(nodes) > 0:
+      cur = nodes.pop()
+
+      wo = self.cache.copy()
+      del wo[cur.state.arr]
+      wo = list(wo.values())
+
+      for node in wo:
+        if (cur.state.arr,node.state.arr) not in self.distances and (node.state.arr,cur.state.arr) not in self.distances:
+          self.distances[(cur.state.arr,node.state.arr)] = self.get_distance(cur,node)
 
 class Node:
   def __init__(self,parents,children,state,graph=None):

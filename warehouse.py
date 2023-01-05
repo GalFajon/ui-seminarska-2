@@ -9,11 +9,12 @@ class Warehouse:
       self.arr = arr
       for i,v in enumerate(arr):
         for j in arr[i]:
-          self.boxes[j] = {
-            "position": i,
-            "height": j,
-            "on_top": False
-          }
+          if j != '':
+            self.boxes[j] = {
+              "position": i,
+              "height": j,
+              "on_top": False
+            }
     else:
       self.arr =(() for i in range(0,p))
 

@@ -5,7 +5,7 @@ class Graph:
   def __init__(self,initial):
     self.cache = dict()
     self.distances = dict()
-    self.root = Node(set(),set(),initial,self)
+    self.root = Node([],[],initial,self)
   
   def cache_node(self,node):
     self.cache[node.state.arr] = node
@@ -78,11 +78,12 @@ class Node:
 
   def add(self,arr):  
     if arr in self.graph.cache.keys():
-        self.graph.cache[arr].parents.add(self)
-        self.children.add(self.graph.cache[arr])
+        if self not in self.graph.cache[arr].parents: self.graph.cache[arr].parents.append(self)
+        if self.graph.cache[arr] not in self.children: self.children.append(self.graph.cache[arr])
     else:
-        n = Node(set([ self ]),set(),warehouse.Warehouse(self.state.p,self.state.n,arr),self.graph)
-        self.children.add(self.graph.cache[arr])
+        n = Node([ self ],[],warehouse.Warehouse(self.state.p,self.state.n,arr),self.graph)
+        if self.graph.cache[arr] not in self.children:
+           self.children.append(self.graph.cache[arr])
 
   def develop(self):
     for box in self.state.boxes:

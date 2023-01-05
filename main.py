@@ -1,10 +1,18 @@
 import warehouse;
 import graph;
 import search;
+import tests;
 
-g = graph.Graph(warehouse.Warehouse(3,3,tuple([ tuple([]),tuple(["B"]),tuple(["A","C"]) ])))
 
-w2 = warehouse.Warehouse(3,3,[ ['B','C','A'], [], [] ])
-n2 = graph.Node(set(),set(),w2)
+for i,case in enumerate(tests.cases):
+    print('Testni primer: ', i)
+    g = graph.Graph(warehouse.Warehouse(case['p'],case['n'], tuple([ tuple(arr) for arr in case['start']])))
 
-search.astar(g,n2)
+    w2 = warehouse.Warehouse(case['p'],case['n'],tuple([ tuple(arr) for arr in case['end']] ))
+    n2 = graph.Node([],[],w2)
+
+    search.bfs(g,n2)
+    #search.dfs(g,n2)
+    #search.id(g,n2)
+    #search.astar(g,n2)
+    #search.idastar(g,n2)

@@ -1,5 +1,7 @@
 import graph
 import math
+import heapq
+from collections import deque
 
 def bfs(g,end):
     max_nodes_in_mem = 0
@@ -7,27 +9,31 @@ def bfs(g,end):
 
     # algo: 
     q = [ g.root ]
+
     v = set()
-    
+    cur = g.root
+
     g.root.prev = None
 
-    while not graph.Node.is_equal(q[0].state.arr,end.state.arr):
-        v.add(q[0].state.arr)
-        q[0].develop()
+    while not graph.Node.is_equal(cur.state.arr,end.state.arr):
+        cur = q.popleft()
+
+        v.add(cur.state.arr)
+        if not cur.developed: cur.develop()
         
-        for child in q[0].children:
+        for child in cur.children:
             if child.state.arr not in v:
-                child.prev = q[0]
+                child.prev = cur
                 q.append(child)
         
-        q.pop(0)
+        q.popleft()
         nodes_processed += 1
 
         if len(q) > max_nodes_in_mem:
             max_nodes_in_mem = len(q)
 
     # trace: 
-    trace = q[0]
+    trace = cur
     seq = []
 
     while trace.prev is not None:
@@ -56,25 +62,25 @@ def dfs(g,end):
     nodes_processed = 0
 
     # algo:
-    s = [ g.root ]
+    s = deque([ g.root ])
     v = set()
 
-    s[0].prev = None
+    cur = g.root
+    cur.prev = None
 
-    while not graph.Node.is_equal(s[0].state.arr,end.state.arr):
-        v.add(s[0].state.arr)
-        s[0].develop()
-
-        r = s.pop(0)
+    while not graph.Node.is_equal(cur.state.arr,end.state.arr):
+        cur = s.popleft()
+        v.add(cur.state.arr)
+        if not cur.developed: cur.develop()
         
         nodes_processed += 1
         if len(s) > max_nodes_in_mem:
             max_nodes_in_mem = len(s)
 
-        for child in r.children:
+        for child in cur.children:
             if child.state.arr not in v:
-                child.prev = r
-                s = [ child ] + s
+                child.prev = cur
+                s.appendleft(child)
 
     # trace:
     trace = s[0]
@@ -106,33 +112,35 @@ def id(g,end):
     nodes_processed = 0
 
     #algo:
-    s = [ g.root ]
+    s = deque([ g.root ])
     v = set()
     limit = 0
     
-    s[0].prev = None
-    s[0].level = 0
+    cur = g.root
+    cur.prev = None
+    cur.level = 0
 
-    while not graph.Node.is_equal(s[0].state.arr,end.state.arr):  
-        v.add(s[0].state.arr)
+    while not graph.Node.is_equal(cur.state.arr,end.state.arr):  
+        cur = s.popleft()
+
+        v.add(cur.state.arr)
 
         if len(s) > max_nodes_in_mem:
             max_nodes_in_mem = len(s)
 
         nodes_processed += 1
-        r = s.pop(0)
-        r.develop()
+        if not cur.developed: cur.develop()
 
-        if r.level <= limit:
-            for child in r.children:
+        if cur.level <= limit:
+            for child in cur.children:
                 if child.state.arr not in v:
-                    child.prev = r
-                    child.level = r.level + 1
-                    s.insert(0,child)
+                    child.prev = cur
+                    child.level = cur.level + 1
+                    s.appendleft(child)
 
         if len(s) == 0:
             limit += 1
-            s = [ g.root ]
+            s = deque([ g.root ])
             v = set()
 
     #trace:
@@ -181,48 +189,40 @@ def astar(g,end):
     nodes_processed = 0
 
     v = set()
-    q = [ g.root ]
+    q = []
+    
+    heapq.heappush(q,(0,g.root))
 
     heuristics = dict()
     heuristics[g.root.state.arr] = 0 + evaluate(g.root.state,end.state)
 
-    next = q[0]
+    next = q[0][1]
     next.prev = None
     next.dist = 0
 
     # algo:
     while not graph.Node.is_equal(next.state.arr,end.state.arr):
         v.add(next.state.arr)
-        next.develop()
-
-        n = [child for child in next.children if child.state.arr not in v]
         
-        for child in n:
-            child.prev = next
-            if not hasattr(child,'dist'): child.dist = next.dist + 1
-            heuristics[child.state.arr] = child.dist + evaluate(child.state,end.state)
-
-        q.extend(n)
+        nodes_processed += 1
 
         if len(q) > max_nodes_in_mem:
             max_nodes_in_mem = len(q)
 
-        min = math.inf
-        
-        for el in q:
-            #if distance(g,g.root.state.arr,el.state.arr) + evaluate(el.state,end.state) < heuristics[el.state.arr]:
-            #    heuristics[el.state.arr] = distance(g,g.root.state.arr,el.state.arr) + evaluate(el.state,end.state)
-            
-            if el.dist + evaluate(el.state,end.state) < heuristics[el.state.arr]:
-                heuristics[el.state.arr] = el.dist + evaluate(el.state,end.state)
+        if not next.developed: next.develop()
 
-        for i,el in enumerate(q):
-            if heuristics[el.state.arr] < min:
-                min = heuristics[el.state.arr]
-                next = el
-                q.pop(i)
+        for child in next.children:
+            if child not in v:
+                if not hasattr(child,'prev'): child.prev = next
+                child.dist = next.dist + 1
+
+                val = child.dist + evaluate(child.state,end.state)
+
+                if child.state.arr not in heuristics or val < heuristics[child.state.arr]:
+                    heuristics[child.state.arr] = val
+                    heapq.heappush(q,(val,child))
         
-        nodes_processed += 1
+        next = heapq.heappop(q)[1]
 
     # trace:
     trace = next
@@ -254,7 +254,7 @@ def idastar(g,end):
     nodes_processed = 0
 
     #algo:
-    s = [ g.root ]
+    s = deque([ g.root ])
     v = set()
     limit = 0
     
@@ -264,36 +264,39 @@ def idastar(g,end):
     bound = heuristics[g.root.state.arr] + 1
     newbound = bound
 
-    s[0].prev = None
-    s[0].dist = 0
+    cur = g.root
+    cur.dist = 0
+    cur.prev = None    
 
     while not graph.Node.is_equal(s[0].state.arr,end.state.arr):  
-        v.add(s[0].state.arr)
+        cur = s.popleft()
+        v.add(cur.state.arr)
 
         if len(s) > max_nodes_in_mem:
             max_nodes_in_mem = len(s)
 
         nodes_processed += 1
-        r = s.pop(0)
-        r.develop()
 
-        if heuristics[r.state.arr] < bound:
-            for child in r.children:
+        if not cur.developed: cur.develop()
+
+        if heuristics[cur.state.arr] < bound:
+            for child in cur.children:
                 if child.state.arr not in v:
-                    child.prev = r                    
-                    child.dist = r.dist + 1
+                    child.prev = cur                    
+                    child.dist = cur.dist + 1
+
                     if child.state.arr not in heuristics or child.dist + evaluate(child.state,end.state) < heuristics[child.state.arr]:
                         heuristics[child.state.arr] = child.dist + evaluate(child.state,end.state)
 
-                    s.insert(0,child)
-        elif heuristics[r.state.arr] > bound:
-            if newbound == bound or heuristics[r.state.arr] < newbound: 
-                newbound = heuristics[r.state.arr]
+                    s.appendleft(child)
+        elif heuristics[cur.state.arr] > bound:
+            if newbound == bound or heuristics[cur.state.arr] < newbound: 
+                newbound = heuristics[cur.state.arr]
 
         if len(s) == 0:
             bound = newbound
             limit += 1
-            s = [ g.root ]
+            s = deque([ g.root ])
             v = set()
 
     #trace:

@@ -62,6 +62,8 @@ class Node:
     self.state = state
     self.graph = graph
 
+    self.developed = False
+
     if self.graph is not None:
       self.graph.cache_node(self)
   
@@ -92,3 +94,11 @@ class Node:
 
             for pos in possible_positions:
                 self.add(robotarm.move(self.state,self.state.boxes[box]["position"],pos))
+    
+    self.developed = True
+  
+  def __lt__(self, other):
+    return 0
+
+  def __le__(self, other):
+    return 0

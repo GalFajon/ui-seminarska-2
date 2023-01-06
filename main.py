@@ -4,16 +4,16 @@ import search;
 import tests;
 
 
-for i,case in enumerate(tests.cases):
+for i,case in enumerate([ tests.cases[1] ]):
     print('Testni primer: ', i)
     g = graph.Graph(warehouse.Warehouse(case['p'],case['n'], tuple([ tuple(arr) for arr in case['start']])))
 
     w2 = warehouse.Warehouse(case['p'],case['n'],tuple([ tuple(arr) for arr in case['end']] ))
     n2 = graph.Node([],[],w2)
 
-    #search.id(g,n2) -> se izvede na useh
-    #search.bfs(g,n2) -> se izvede na useh
-    #search.id(g,n2) #-> se izvede na useh
+    #search.dfs(g,n2)
+    #search.bfs(g,n2)
+    #search.id(g,n2)
 
-    #search.astar(g,n2) -> se izvede na useh
-    #search.idastar(g,n2) -> se izvede do 4
+    search.idastar(g,n2)
+    search.astar(g,n2)

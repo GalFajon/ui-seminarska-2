@@ -8,7 +8,7 @@ def bfs(g,end):
     nodes_processed = 0
 
     # algo: 
-    q = [ g.root ]
+    q = deque([ g.root ])
 
     v = set()
     cur = g.root
@@ -83,7 +83,7 @@ def dfs(g,end):
                 s.appendleft(child)
 
     # trace:
-    trace = s[0]
+    trace = cur
     seq = []
 
     while trace.prev is not None:
@@ -144,7 +144,7 @@ def id(g,end):
             v = set()
 
     #trace:
-    trace = s[0]
+    trace = cur
     seq = []
 
     while trace.prev is not None:
@@ -172,21 +172,15 @@ def evaluate(state1,state2):
     s = 0
 
     for box in state1.boxes:
-        s += math.sqrt(math.pow(state1.boxes[box]['position'] - state2.boxes[box]['position'],2) + math.pow(state1.boxes[box]['height'] - state2.boxes[box]['height'],2))
+        if state1.boxes[box]['position'] != state2.boxes[box]['position'] or state1.boxes[box]['height'] != state2.boxes[box]['height']:
+            s += 1
     
-    return round(s)
-
-def distance(g,arr1,arr2):
-    if (arr1,arr2) in g.distances:
-        return g.distances[(arr1,arr2)]
-    elif (arr2,arr1) in g.distances:
-        return g.distances[(arr2,arr1)]
-    elif arr2 == arr1:
-        return 0
+    return s
 
 def astar(g,end):
     max_nodes_in_mem = 0
     nodes_processed = 0
+    path_len = 0
 
     v = set()
     q = []
@@ -203,7 +197,7 @@ def astar(g,end):
     # algo:
     while not graph.Node.is_equal(next.state.arr,end.state.arr):
         v.add(next.state.arr)
-        
+
         nodes_processed += 1
 
         if len(q) > max_nodes_in_mem:
@@ -230,6 +224,7 @@ def astar(g,end):
 
     while trace.prev is not None:
         seq.append(trace.state.arr)
+        path_len += 1
 
         for box in trace.state.boxes:
             if trace.state.boxes[box]['position'] != trace.prev.state.boxes[box]['position']:
@@ -246,30 +241,34 @@ def astar(g,end):
     print("statistika:")
     print("st vozlisc v mem: ", max_nodes_in_mem)
     print("obdelanih vozlisc: ", nodes_processed)
+    print("dolzina poti: ", path_len)
 
     return next
 
 def idastar(g,end):   
     max_nodes_in_mem = 0
     nodes_processed = 0
+    path_len = 0
 
     #algo:
     s = deque([ g.root ])
     v = set()
+
     limit = 0
     
     heuristics = dict()
     heuristics[g.root.state.arr] = 0 + evaluate(g.root.state,end.state)
     
-    bound = heuristics[g.root.state.arr] + 1
+    bound = heuristics[g.root.state.arr]
     newbound = bound
 
     cur = g.root
     cur.dist = 0
     cur.prev = None    
 
-    while not graph.Node.is_equal(s[0].state.arr,end.state.arr):  
+    while not (graph.Node.is_equal(cur.state.arr,end.state.arr) and heuristics[cur.state.arr] < bound):  
         cur = s.popleft()
+
         v.add(cur.state.arr)
 
         if len(s) > max_nodes_in_mem:
@@ -279,17 +278,19 @@ def idastar(g,end):
 
         if not cur.developed: cur.develop()
 
-        if heuristics[cur.state.arr] < bound:
+        if heuristics[cur.state.arr] <= bound:
             for child in cur.children:
                 if child.state.arr not in v:
                     child.prev = cur                    
                     child.dist = cur.dist + 1
 
-                    if child.state.arr not in heuristics or child.dist + evaluate(child.state,end.state) < heuristics[child.state.arr]:
-                        heuristics[child.state.arr] = child.dist + evaluate(child.state,end.state)
+                    val = child.dist + evaluate(child.state,end.state)
+
+                    if child.state.arr not in heuristics or val < heuristics[child.state.arr]:
+                        heuristics[child.state.arr] = val
 
                     s.appendleft(child)
-        elif heuristics[cur.state.arr] > bound:
+        else:
             if newbound == bound or heuristics[cur.state.arr] < newbound: 
                 newbound = heuristics[cur.state.arr]
 
@@ -300,7 +301,7 @@ def idastar(g,end):
             v = set()
 
     #trace:
-    trace = s[0]
+    trace = cur
     seq = []
 
     while trace.prev is not None:
@@ -310,16 +311,19 @@ def idastar(g,end):
             if trace.state.boxes[box]['position'] != trace.prev.state.boxes[box]['position']:
                 seq.append([trace.prev.state.boxes[box]['position'],trace.state.boxes[box]['position']])
 
+        path_len += 1
         trace = trace.prev
     
     seq.append(g.root.state.arr)
 
     for line in reversed(seq):
-        print(line)
+        pass
+        #print(line)
 
     #stats:
     print("statistika:")
     print("st vozlisc v mem: ", max_nodes_in_mem)
     print("obdelanih vozlisc: ", nodes_processed)
+    print("dolzina poti: ", path_len)
 
     return s[0]

@@ -5,7 +5,7 @@ class Graph:
   def __init__(self,initial):
     self.cache = dict()
     self.distances = dict()
-    self.root = Node([],[],initial,self)
+    self.root = Node([ None ],[],initial,self)
   
   def cache_node(self,node):
     self.cache[node.state.arr] = node
